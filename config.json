@@ -1,0 +1,14 @@
+{
+  "proxies": [
+      {
+          "server": "185.183.160.58:16196",
+          "username": "fg2yVaet5b",
+          "password": "Lu96hrngkh"
+      }
+  ],
+  "query": "пальто из натуральной шерсти",
+  "count_pages": 1,
+  "count_workers": 1,
+  "count_max_scroll": 50,
+  "random_pause_range": [0.2, 1.0]
+}
