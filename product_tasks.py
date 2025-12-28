@@ -15,7 +15,7 @@ async def product_parsing_task(context, queue: asyncio.Queue, results: List[Dict
         while True:
             # Пока в очереди есть ссылки, задача работает
             try:
-                url = await asyncio.wait_for(queue.get(), timeout=30)
+                url = await asyncio.wait_for(queue.get(), timeout=40)
             except asyncio.TimeoutError:
                 # Задачи закончены
                 break
@@ -26,7 +26,7 @@ async def product_parsing_task(context, queue: asyncio.Queue, results: List[Dict
                 logger.info(f"Success parsed product page {url}")
             except PlaywrightTimeoutError:
                 # Будет попытка ещё раз обработать страницу
-                logger.exception(f"Parse product Timeout. Retry load page {url}")
+                logger.error(f"Parse product Timeout. Retry load page {url}")
                 await queue.put(url)
                 continue
             except Exception:

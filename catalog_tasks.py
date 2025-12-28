@@ -39,7 +39,7 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
     try:
         while True:
             try:
-                url = await asyncio.wait_for(queue.get(), timeout=30)
+                url = await asyncio.wait_for(queue.get(), timeout=40)
             except asyncio.TimeoutError:
                 # Задачи закончены
                 break
@@ -49,7 +49,7 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
                 product_links.extend(links)
             except PlaywrightTimeoutError:
                 # Будет попытка ещё раз обработать страницу
-                logger.exception(f"Parse catalog Timeout. Retry load page {url}")
+                logger.error(f"Parse catalog Timeout. Retry load page {url}")
                 await queue.put(url)
                 continue
             except Exception:
