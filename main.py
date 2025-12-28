@@ -1,5 +1,5 @@
 import asyncio
-from typing import List
+from pathlib import Path
 
 from loguru import logger
 from playwright.async_api import async_playwright
@@ -9,6 +9,15 @@ from config import conf
 from export_data import save_data
 from product_tasks import run_product_parsing_tasks
 from utils import count_unique_links, find_duplicate_links, remove_duplicate_links
+
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+
+logger.add(
+    LOG_DIR / "app.log",
+    level="DEBUG",
+    encoding="utf-8"
+)
 
 
 async def main():
