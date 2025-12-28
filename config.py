@@ -15,6 +15,7 @@ class Config:
     count_workers: int
     count_max_scroll: int
     random_pause_range: Tuple[float, float]
+    output_path: str
 
 
 def load_config() -> Config:

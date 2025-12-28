@@ -40,13 +40,6 @@ async def emulate_scroll_to_bottom_page(page: Page):
             logger.exception("Scroll exception")
 
 
-
-async def download_pdf(page: Page, url: str):
-    await page.emulate_media(media="print")
-    await page.goto(url)
-    await page.pdf(path="page.pdf")
-
-
 async def emulate_user_actions(page: Page):
     await page.mouse.move(
         random.randint(100, 600),
