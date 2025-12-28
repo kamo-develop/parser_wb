@@ -1,8 +1,10 @@
 import asyncio
+from typing import List
+
 from loguru import logger
 from playwright.async_api import async_playwright
 
-from catalog_tasks import run_catalog_parsing_tasks
+from catalog_tasks import run_catalog_parsing_tasks, count_unique_links
 from config import conf
 from export_data import save_data
 from product_tasks import run_product_parsing_tasks
@@ -17,7 +19,9 @@ async def main():
         )
         # Получить ссылки на товары со страниц каталога
         product_links = await run_catalog_parsing_tasks(browser)
-        logger.info(f"Found {len(product_links)} products")
+
+        count_unique = count_unique_links(product_links)
+        logger.info(f"Found {len(product_links)} products ({count_unique} unique)")
 
         # Парсинг страниц товаров
         results = await run_product_parsing_tasks(browser, product_links)

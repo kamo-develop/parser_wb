@@ -54,14 +54,8 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
                 continue
             except Exception:
                 logger.exception(f"Parse catalog Error. Skip page {url}")
-                continue
             finally:
-                try:
-                    queue.task_done()
-                except Exception:
-                    pass
-    except Exception:
-        logger.exception("Task for catalog page parsing failed")
+                queue.task_done()
     finally:
         await page.close()
 
@@ -69,7 +63,7 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
 async def run_catalog_parsing_tasks(browser) -> List[str]:
     base_search_url = "https://www.wildberries.ru/catalog/0/search.aspx"
     link_catalog_pages = [
-        f"{base_search_url}?search={quote(conf.query)}?page={page}"
+        f"{base_search_url}?page={page}&search={quote(conf.query)}"
         for page in range(conf.page_num_start, conf.page_num_end + 1)
     ]
     logger.info(f"Start parsing catalog pages from {conf.page_num_start} to {conf.page_num_end}")
@@ -77,6 +71,7 @@ async def run_catalog_parsing_tasks(browser) -> List[str]:
     queue: asyncio.Queue = asyncio.Queue()
     for link in link_catalog_pages:
         await queue.put(link)
+        logger.debug(f"Parsing catalog page {link}")
 
     contexts = await create_contexts_with_proxy(browser)
 
@@ -95,3 +90,8 @@ async def run_catalog_parsing_tasks(browser) -> List[str]:
             except Exception:
                 logger.exception("Context closing failed")
     return []
+
+
+def count_unique_links(links: List[str]):
+    unique_links = set(links)
+    return len(unique_links)

@@ -31,14 +31,8 @@ async def product_parsing_task(context, queue: asyncio.Queue, results: List[Dict
                 continue
             except Exception:
                 logger.exception(f"Parse product Error. Skip page {url}")
-                continue
             finally:
-                try:
-                    queue.task_done()
-                except Exception:
-                    pass
-    except Exception:
-        logger.exception("Task for product parsing failed")
+                queue.task_done()
     finally:
         await page.close()
 
