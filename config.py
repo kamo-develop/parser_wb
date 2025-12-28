@@ -13,7 +13,8 @@ class Config:
     query: str
     page_num_start: int
     page_num_end: int
-    count_workers: int
+    count_contexts: int
+    pages_per_context: int
     count_max_scroll: int
     random_pause_range: Tuple[float, float]
     output_path: str

@@ -1,5 +1,6 @@
 import asyncio
 import random
+from typing import List, Dict, Counter
 
 from loguru import logger
 from playwright.async_api import Page
@@ -63,3 +64,23 @@ async def is_antibot_page(page: Page) -> bool:
         return True
 
     return False
+
+
+def count_unique_links(links: List[str]) -> int:
+    unique_links = set(links)
+    return len(unique_links)
+
+def find_duplicate_links(links: List[str]) -> Dict[str, int]:
+    counter = Counter(links)
+    return {link: count for link, count in counter.items() if count > 1}
+
+def remove_duplicate_links(links: List[str]) -> List[str]:
+    seen = set()
+    result = []
+
+    for link in links:
+        if link not in seen:
+            seen.add(link)
+            result.append(link)
+
+    return result

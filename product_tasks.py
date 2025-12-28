@@ -4,6 +4,7 @@ from typing import List, Dict, Any
 from loguru import logger
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
 
+from config import conf
 from context_manager import create_contexts_with_proxy
 from export_data import save_data
 from parse_product import parse_product_page
@@ -45,7 +46,11 @@ async def run_product_parsing_tasks(browser, links: List[str]) -> List[Dict[str,
     contexts = await create_contexts_with_proxy(browser)
 
     results: List[Dict[str, Any]] = []
-    tasks = [asyncio.create_task(product_parsing_task(context, queue, results)) for context in contexts]
+    tasks = []
+    for context in contexts:
+        for i in range(conf.pages_per_context):
+            # На один контекст несколько задач (страниц)
+            tasks.append(asyncio.create_task(product_parsing_task(context, queue, results)))
 
     try:
         await asyncio.gather(*tasks)

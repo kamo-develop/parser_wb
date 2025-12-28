@@ -23,9 +23,11 @@
   ],
   "query": "пальто из натуральной шерсти",
   "page_num_start": 1,
-  "page_num_end": 5,
-  "count_workers": 4,
+  "page_num_end": 1,
   "output_path": "output",
+
+  "count_contexts": 4,
+  "pages_per_context": 2,
 
   "filtered_rating": 4.5,
   "filtered_price": 10000,

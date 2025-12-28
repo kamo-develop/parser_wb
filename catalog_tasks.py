@@ -1,12 +1,12 @@
 import asyncio
-from typing import List
+from typing import List, Dict
 from urllib.parse import quote
 
 from loguru import logger
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
 
 from config import conf
-from context_manager import create_contexts_with_proxy
+from context_manager import create_contexts_with_proxy, create_one_context
 from utils import is_antibot_page, emulate_scroll_to_bottom_page
 
 
@@ -45,6 +45,7 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
                 break
 
             try:
+                logger.debug(f"Parsing catalog page {url}")
                 links = await parse_catalog_page(page, url)
                 product_links.extend(links)
             except PlaywrightTimeoutError:
@@ -71,12 +72,15 @@ async def run_catalog_parsing_tasks(browser) -> List[str]:
     queue: asyncio.Queue = asyncio.Queue()
     for link in link_catalog_pages:
         await queue.put(link)
-        logger.debug(f"Parsing catalog page {link}")
-
-    contexts = await create_contexts_with_proxy(browser)
 
     product_links: List[str] = []
-    tasks = [asyncio.create_task(catalog_page_parsing_task(context, queue, product_links)) for context in contexts]
+
+    context = await create_one_context(browser)
+    # Один контекст (один прокси), чтобы не ловить дубли
+    tasks = []
+    for i in range(conf.pages_per_context):
+        # На один контекст несколько задач (страниц)
+        tasks.append(asyncio.create_task(catalog_page_parsing_task(context, queue, product_links)))
 
     try:
         await asyncio.gather(*tasks)
@@ -84,14 +88,8 @@ async def run_catalog_parsing_tasks(browser) -> List[str]:
     except Exception:
         logger.exception("Error parsing")
     finally:
-        for context in contexts:
-            try:
-                await context.close()
-            except Exception:
-                logger.exception("Context closing failed")
+        try:
+            await context.close()
+        except Exception:
+            logger.exception("Context closing failed")
     return []
-
-
-def count_unique_links(links: List[str]):
-    unique_links = set(links)
-    return len(unique_links)
