@@ -12,10 +12,11 @@ def save_data(results: List[Dict[str, Any]]):
     full_path = os.path.join(conf.output_path, "full_catalog.xlsx")
     df.to_excel(full_path, index=False)
 
+    # Фильтрация по критериям
     df_filtered = df[
-        (df["rating"] >= 4.5) &
-        (df["price"] <= 10000) &
-        (df["Страна производства"] == "Россия")
+        (df["rating"] >= conf.filtered_rating) &
+        (df["price"] <= conf.filtered_price) &
+        (df["Страна производства"] == conf.filtered_country)
         ].copy()
     full_path = os.path.join(conf.output_path, "filtered_catalog.xlsx")
     df_filtered.to_excel(full_path, index=False)

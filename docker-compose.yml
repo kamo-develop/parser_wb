@@ -1,0 +1,8 @@
+services:
+  app:
+    build:
+      context: .
+    restart: on-failure
+    container_name: wb-parser
+    volumes:
+      - ./output:/app/output

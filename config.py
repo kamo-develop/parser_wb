@@ -11,11 +11,15 @@ ROOT_DIR = Path(__file__).resolve().parent
 class Config:
     proxies: List[Dict[str, str]]
     query: str
-    count_pages: int
+    page_num_start: int
+    page_num_end: int
     count_workers: int
     count_max_scroll: int
     random_pause_range: Tuple[float, float]
     output_path: str
+    filtered_rating: float
+    filtered_price: float
+    filtered_country: str
 
 
 def load_config() -> Config:

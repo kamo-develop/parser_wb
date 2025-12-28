@@ -1,0 +1,15 @@
+FROM python:3.12
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN playwright install --with-deps
+
+COPY . .
+
+RUN mkdir -p /app/output
+
+ENTRYPOINT exec python main.py

@@ -18,9 +18,7 @@ async def parse_catalog_page(page: Page, url: str) -> List[str]:
 
     card_wrapper = page.locator("div.product-card__wrapper").first
     await card_wrapper.wait_for(state="visible")
-    logger.debug(f"Found first card__wrapper")
     await emulate_scroll_to_bottom_page(page)
-    logger.debug(f"End page")
 
     if await is_antibot_page(page):
         logger.error(f"Found antibot page {url}")
@@ -32,7 +30,7 @@ async def parse_catalog_page(page: Page, url: str) -> List[str]:
         card_link = card.locator("a.product-card__link").first
         links.append(await card_link.get_attribute("href"))
 
-    logger.debug(f"Found {len(links)} links")
+    logger.info(f"Found {len(links)} product cards")
     return links
 
 
@@ -41,7 +39,7 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
     try:
         while True:
             try:
-                url = await asyncio.wait_for(queue.get(), timeout=10)
+                url = await asyncio.wait_for(queue.get(), timeout=30)
             except asyncio.TimeoutError:
                 # Задачи закончены
                 break
@@ -72,8 +70,9 @@ async def run_catalog_parsing_tasks(browser) -> List[str]:
     base_search_url = "https://www.wildberries.ru/catalog/0/search.aspx"
     link_catalog_pages = [
         f"{base_search_url}?search={quote(conf.query)}?page={page}"
-        for page in range(1, conf.count_pages + 1)
+        for page in range(conf.page_num_start, conf.page_num_end + 1)
     ]
+    logger.info(f"Start parsing catalog pages from {conf.page_num_start} to {conf.page_num_end}")
 
     queue: asyncio.Queue = asyncio.Queue()
     for link in link_catalog_pages:

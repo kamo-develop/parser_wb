@@ -6,35 +6,31 @@
           "password": "Lu96hrngkh"
       },
       {
-          "server": "147.45.38.232:8000",
-          "username": "BDVNP8",
-          "password": "9m0UmR"
+          "server": "194.226.247.151:22320",
+          "username": "JjcvMJC8uh",
+          "password": "9mNRMcndZt"
       },
       {
-          "server": "147.45.61.83:8000",
-          "username": "yG62xa",
-          "password": "VdyPY7"
+          "server": "185.42.27.200:15493",
+          "username": "ZXyaJQfYBT",
+          "password": "GV35HE8gey"
       },
       {
-          "server": "147.45.38.48:8000",
-          "username": "yG62xa",
-          "password": "VdyPY7"
-      },
-      {
-          "server": "147.45.39.148:8000",
-          "username": "yG62xa",
-          "password": "VdyPY7"
-      },
-      {
-          "server": "147.45.38.223:8000",
-          "username": "yG62xa",
-          "password": "VdyPY7"
+          "server": "185.42.27.128:18853",
+          "username": "7cnHmMrHZ5",
+          "password": "6jP7EjnSAB"
       }
   ],
   "query": "пальто из натуральной шерсти",
-  "count_pages": 3,
-  "count_workers": 6,
+  "page_num_start": 1,
+  "page_num_end": 10,
+  "count_workers": 4,
+  "output_path": "output",
+
+  "filtered_rating": 4.5,
+  "filtered_price": 10000,
+  "filtered_country": "Россия",
+
   "count_max_scroll": 50,
-  "random_pause_range": [0.2, 1.0],
-  "output_path": "output"
+  "random_pause_range": [0.2, 1.0]
 }
