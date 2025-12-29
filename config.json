@@ -27,7 +27,7 @@
   "output_path": "output",
 
   "count_contexts": 4,
-  "pages_per_context": 4,
+  "pages_per_context": 2,
 
   "filtered_rating": 4.5,
   "filtered_price": 10000,
