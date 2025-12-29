@@ -41,7 +41,9 @@ async def product_parsing_task(context, queue: asyncio.Queue, results: List[Dict
                 continue
             except PlaywrightError:
                 logger.exception(f"Playwright network error. Retry load page {url}")
-                await random_sleep(120, 180)
+                await random_sleep(30, 120)
+                await page.close()
+                page: Page = await context.new_page()
                 await queue.put(url)
                 continue
             except Exception:
