@@ -24,7 +24,6 @@ async def product_parsing_task(context, queue: asyncio.Queue, results: List[Dict
                 break
 
             try:
-                await random_sleep(0.1, 0.3)
                 data = await parse_product_page(page, url)
                 results.append(data)
                 logger.info(f"Success parsed product page {url}")

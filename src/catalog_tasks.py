@@ -46,7 +46,6 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
                 break
 
             try:
-                await random_sleep(0.1, 0.3)
                 logger.debug(f"Parsing catalog page {url}")
                 links = await parse_catalog_page(page, url)
                 product_links.extend(links)

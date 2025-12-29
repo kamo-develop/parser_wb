@@ -55,12 +55,10 @@ async def click_characteristic_button(page: Page, url: str):
     try:
         # Получить кнопку
         desc_button = page.locator('div[class^="mainWrap-"] div[class^="options-"] div.mo-button__text-content').first
-        await desc_button.wait_for(state="attached")
-        await desc_button.scroll_into_view_if_needed()
         await desc_button.wait_for(state="visible")
         await desc_button.click()
     except PlaywrightTimeoutError:
-        logger.exception(f"Timeout while click characteristic button {url}")
+        logger.warning(f"Timeout while click characteristic button {url}")
     except Exception:
         logger.exception(f"click_characteristic_button failed {url}")
 
@@ -119,13 +117,11 @@ async def get_product_characteristic(page: Page, url: str) -> Dict[str, str]:
     Получить описание товара
     """
     try:
-        modal = page.locator('div.mo-modal__wrapper div[class^="content-"]').first
-        if not await modal.is_visible():
+        modal = page.locator('div.mo-modal__wrapper div[class^="content-"]')
+        if await modal.count() == 0:
             await click_characteristic_button(page, url)
-        await modal.wait_for(state="visible")
-        rows_locator = modal.locator("table tr")
-        await rows_locator.first.wait_for(state="visible")
-        rows = await rows_locator.all()
+        await modal.first.wait_for(state="visible")
+        rows = await modal.first.locator("table tr").all()
         characteristics = {}
         for row in rows:
             try:
@@ -133,12 +129,12 @@ async def get_product_characteristic(page: Page, url: str) -> Dict[str, str]:
                 value = await row.locator("td").first.inner_text()
                 characteristics[key] = value
             except PlaywrightTimeoutError:
-                logger.exception(f"Timeout while loading one row characteristic {url}")
+                logger.warning(f"Timeout while loading one row characteristic {url}")
             except Exception:
                 logger.exception("characteristic failed {url}")
         return characteristics
     except PlaywrightTimeoutError:
-        logger.exception(f"Timeout while loading characteristic {url}")
+        logger.warning(f"Timeout while loading characteristic {url}")
     except Exception:
         logger.exception(f"get_product_characteristic failed {url}")
     return {}
@@ -149,22 +145,15 @@ async def get_product_seller(page: Page, url: str) -> Tuple[str, str]:
     Получить название и ссылку на селлера
     """
     try:
-        block = page.locator("div[class^=sellerInfoWrap-]").first
-        await block.wait_for(state="attached")
-        await block.scroll_into_view_if_needed()
+        block = page.locator("div[class^=sellerInfoWrap-] a").first
         await block.wait_for(state="visible")
-        block_link = block.locator("a").first
-        await block_link.wait_for(state="visible")
-        link = await block_link.get_attribute("href")
-
-        block_name = block.locator("div[class^=sellerInfoNameDefault-] span:nth-of-type(1)").first
-        await block_name.wait_for(state="attached")
-        await block_name.scroll_into_view_if_needed()
+        link = await block.get_attribute("href")
+        block_name = block.locator("div[class^=sellerInfoNameDefault-] span:nth-of-type(1)")
         await block_name.wait_for(state="visible")
         seller_name = await block_name.inner_text()
         return seller_name, link
     except PlaywrightTimeoutError:
-        logger.exception(f"Timeout while loading seller {url}")
+        logger.warning(f"Timeout while loading seller {url}")
     except Exception:
         logger.exception(f"get_product_seller failed {url}")
     return ("", "")
@@ -235,8 +224,6 @@ async def get_product_rating(page: Page, url: str) -> Tuple[float, int]:
     """
     try:
         block = page.locator("div[class^=productCommonInfo-] a:nth-of-type(1) span").first
-        await block.wait_for(state="attached")
-        await block.scroll_into_view_if_needed()
         await block.wait_for(state="visible")
         rating_str = await block.inner_text()
 
@@ -252,7 +239,7 @@ async def get_product_rating(page: Page, url: str) -> Tuple[float, int]:
 
         return rating, count
     except PlaywrightTimeoutError:
-        logger.exception(f"Timeout while loading rating {url}")
+        logger.warning(f"Timeout while loading rating {url}")
     except Exception:
         logger.exception(f"get_product_rating failed {url}")
     return 0.0, 0
