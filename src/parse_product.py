@@ -55,10 +55,12 @@ async def click_characteristic_button(page: Page, url: str):
     try:
         # Получить кнопку
         desc_button = page.locator('div[class^="mainWrap-"] div[class^="options-"] div.mo-button__text-content').first
+        await desc_button.wait_for(state="attached")
+        await desc_button.scroll_into_view_if_needed()
         await desc_button.wait_for(state="visible")
         await desc_button.click()
     except PlaywrightTimeoutError:
-        logger.warning(f"Timeout while click characteristic button {url}")
+        logger.exception(f"Timeout while click characteristic button {url}")
     except Exception:
         logger.exception(f"click_characteristic_button failed {url}")
 
@@ -71,7 +73,14 @@ async def get_product_description(page: Page, url: str) -> str:
         # Дождаться прогрузки окна
         modal = page.locator('div.mo-modal__wrapper div[class^="content-"]').first
         await modal.wait_for(state="visible")
-        return await modal.locator("section#section-description").first.inner_text()
+        desc_text = await modal.locator("section#section-description").first.inner_text()
+
+        if desc_text.startswith("Описание"):
+            desc_clean = desc_text[len("Описание"):].strip()
+        else:
+            desc_clean = desc_text.strip()
+        return desc_clean
+
     except PlaywrightTimeoutError:
         logger.warning(f"Timeout while loading description {url}")
     except Exception:
@@ -110,11 +119,13 @@ async def get_product_characteristic(page: Page, url: str) -> Dict[str, str]:
     Получить описание товара
     """
     try:
-        modal = page.locator('div.mo-modal__wrapper div[class^="content-"]')
-        if await modal.count() == 0:
+        modal = page.locator('div.mo-modal__wrapper div[class^="content-"]').first
+        if not await modal.is_visible():
             await click_characteristic_button(page, url)
-        await modal.first.wait_for(state="visible")
-        rows = await modal.first.locator("table tr").all()
+        await modal.wait_for(state="visible")
+        rows_locator = modal.locator("table tr")
+        await rows_locator.first.wait_for(state="visible")
+        rows = await rows_locator.all()
         characteristics = {}
         for row in rows:
             try:
@@ -122,12 +133,12 @@ async def get_product_characteristic(page: Page, url: str) -> Dict[str, str]:
                 value = await row.locator("td").first.inner_text()
                 characteristics[key] = value
             except PlaywrightTimeoutError:
-                logger.warning(f"Timeout while loading one row characteristic {url}")
+                logger.exception(f"Timeout while loading one row characteristic {url}")
             except Exception:
                 logger.exception("characteristic failed {url}")
         return characteristics
     except PlaywrightTimeoutError:
-        logger.warning(f"Timeout while loading characteristic {url}")
+        logger.exception(f"Timeout while loading characteristic {url}")
     except Exception:
         logger.exception(f"get_product_characteristic failed {url}")
     return {}
@@ -138,15 +149,22 @@ async def get_product_seller(page: Page, url: str) -> Tuple[str, str]:
     Получить название и ссылку на селлера
     """
     try:
-        block = page.locator("div[class^=sellerInfoWrap-] a").first
+        block = page.locator("div[class^=sellerInfoWrap-]").first
+        await block.wait_for(state="attached")
+        await block.scroll_into_view_if_needed()
         await block.wait_for(state="visible")
-        link = await block.get_attribute("href")
-        block_name = block.locator("div[class^=sellerInfoNameDefault-] span:nth-of-type(1)")
+        block_link = block.locator("a").first
+        await block_link.wait_for(state="visible")
+        link = await block_link.get_attribute("href")
+
+        block_name = block.locator("div[class^=sellerInfoNameDefault-] span:nth-of-type(1)").first
+        await block_name.wait_for(state="attached")
+        await block_name.scroll_into_view_if_needed()
         await block_name.wait_for(state="visible")
         seller_name = await block_name.inner_text()
         return seller_name, link
     except PlaywrightTimeoutError:
-        logger.warning(f"Timeout while loading seller {url}")
+        logger.exception(f"Timeout while loading seller {url}")
     except Exception:
         logger.exception(f"get_product_seller failed {url}")
     return ("", "")
@@ -217,6 +235,8 @@ async def get_product_rating(page: Page, url: str) -> Tuple[float, int]:
     """
     try:
         block = page.locator("div[class^=productCommonInfo-] a:nth-of-type(1) span").first
+        await block.wait_for(state="attached")
+        await block.scroll_into_view_if_needed()
         await block.wait_for(state="visible")
         rating_str = await block.inner_text()
 
@@ -232,7 +252,7 @@ async def get_product_rating(page: Page, url: str) -> Tuple[float, int]:
 
         return rating, count
     except PlaywrightTimeoutError:
-        logger.warning(f"Timeout while loading rating {url}")
+        logger.exception(f"Timeout while loading rating {url}")
     except Exception:
         logger.exception(f"get_product_rating failed {url}")
     return 0.0, 0

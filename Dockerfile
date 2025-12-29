@@ -13,4 +13,4 @@ COPY . .
 RUN mkdir -p /app/output
 RUN mkdir -p /app/logs
 
-ENTRYPOINT exec python main.py
+ENTRYPOINT exec python src/main.py

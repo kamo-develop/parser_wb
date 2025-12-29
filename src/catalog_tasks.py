@@ -4,6 +4,7 @@ from urllib.parse import quote
 
 from loguru import logger
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
+from playwright.async_api import Error as PlaywrightError
 
 from config import conf
 from context_manager import create_contexts_with_proxy, create_one_context
@@ -51,6 +52,10 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
             except PlaywrightTimeoutError:
                 # Будет попытка ещё раз обработать страницу
                 logger.error(f"Parse catalog Timeout. Retry load page {url}")
+                await queue.put(url)
+                continue
+            except PlaywrightError:
+                logger.exception(f"Playwright network error. Retry load page {url}")
                 await queue.put(url)
                 continue
             except Exception:

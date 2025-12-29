@@ -5,7 +5,6 @@ from typing import Dict, List, Tuple
 
 from loguru import logger
 
-ROOT_DIR = Path(__file__).resolve().parent
 
 @dataclass
 class Config:
@@ -25,7 +24,8 @@ class Config:
 
 def load_config() -> Config:
     try:
-        with open(ROOT_DIR / "config.json", "r", encoding="utf-8") as f:
+        root_dir = Path(__file__).resolve().parents[1]
+        with open(root_dir / "config.json", "r", encoding="utf-8") as f:
             config_json = json.load(f)
             if "random_pause_range" in config_json:
                 config_json["random_pause_range"] = tuple(config_json["random_pause_range"])
