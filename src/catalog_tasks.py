@@ -56,9 +56,9 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
                 await queue.put(url)
                 continue
             except PlaywrightError:
-                # Будет попытка ещё раз обработать страницу
                 logger.exception(f"Playwright network error. Retry load page {url}")
-                await random_sleep(30, 120)
+                await random_sleep(3, 5)
+                # Перезапуск страницы
                 await page.close()
                 page: Page = await context.new_page()
                 await queue.put(url)
