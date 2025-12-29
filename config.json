@@ -1,14 +1,14 @@
 {
   "proxies": [
       {
-          "server": "194.226.247.151:22320",
-          "username": "JjcvMJC8uh",
-          "password": "9mNRMcndZt"
-      },
-      {
           "server": "185.183.160.58:16196",
           "username": "fg2yVaet5b",
           "password": "Lu96hrngkh"
+      },
+      {
+          "server": "194.226.247.151:22320",
+          "username": "JjcvMJC8uh",
+          "password": "9mNRMcndZt"
       },
       {
           "server": "185.42.27.200:15493",
