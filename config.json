@@ -34,5 +34,5 @@
   "filtered_country": "Россия",
 
   "count_max_scroll": 50,
-  "random_pause_range": [0.2, 1.0]
+  "random_pause_range": [0.5, 1.0]
 }
