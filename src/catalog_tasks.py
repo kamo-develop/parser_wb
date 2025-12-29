@@ -56,8 +56,9 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
                 await queue.put(url)
                 continue
             except PlaywrightError:
+                # Будет попытка ещё раз обработать страницу
                 logger.exception(f"Playwright network error. Retry load page {url}")
-                await random_sleep(1, 5)
+                await random_sleep(120, 180)
                 await queue.put(url)
                 continue
             except Exception:
@@ -70,12 +71,14 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
 
 async def run_catalog_parsing_tasks(browser) -> List[str]:
     base_search_url = "https://www.wildberries.ru/catalog/0/search.aspx"
+    # Формирует ссылки на страницы каталога
     link_catalog_pages = [
         f"{base_search_url}?page={page}&search={quote(conf.query)}"
         for page in range(conf.page_num_start, conf.page_num_end + 1)
     ]
     logger.info(f"Start parsing catalog pages from {conf.page_num_start} to {conf.page_num_end}")
 
+    # Заполняет ссылками очередь
     queue: asyncio.Queue = asyncio.Queue()
     for link in link_catalog_pages:
         await queue.put(link)

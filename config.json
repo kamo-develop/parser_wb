@@ -23,7 +23,7 @@
   ],
   "query": "пальто из натуральной шерсти",
   "page_num_start": 1,
-  "page_num_end": 1,
+  "page_num_end": 45,
   "output_path": "output",
 
   "count_contexts": 4,
