@@ -24,7 +24,13 @@ async def product_parsing_task(context, queue: asyncio.Queue, results: List[Dict
                 break
 
             try:
-                data = await parse_product_page(page, url)
+                data = {}
+                for i in range(3):
+                    data, success = await parse_product_page(page, url)
+                    if success:
+                        break
+                    else:
+                        logger.debug(f"Attempt {i+1} not success {url}")
                 results.append(data)
                 logger.info(f"Success parsed product page {url}")
             except PlaywrightTimeoutError:

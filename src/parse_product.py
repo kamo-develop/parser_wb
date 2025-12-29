@@ -1,5 +1,5 @@
 import re
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 
 from loguru import logger
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
@@ -18,22 +18,23 @@ def get_article_from_url(url: str) -> str:
     return ""
 
 
-async def get_product_title(page: Page, url: str) -> str:
+async def get_product_title(page: Page, url: str) -> tuple[str, bool]:
     """
     Получить название товара
     """
     try:
         block = page.locator("div[class^=mainWrap-] h3").first
         await block.wait_for(state="visible")
-        return await block.inner_text()
+        return await block.inner_text(), True
     except PlaywrightTimeoutError:
         logger.warning(f"Timeout while loading title {url}")
+        return "", False
     except Exception:
         logger.exception(f"get_product_title failed {url}")
-    return ""
+    return "", True
 
 
-async def get_product_price(page: Page, url: str) -> float:
+async def get_product_price(page: Page, url: str) -> tuple[float, bool]:
     """
     Получить цену товара
     """
@@ -43,12 +44,13 @@ async def get_product_price(page: Page, url: str) -> float:
             block = page.locator('span[class^=priceBlockPrice-]').first
         await block.wait_for(state="visible")
         price_text = await block.inner_text()
-        return float(re.sub(r"[^\d.,]", "", price_text).replace(",", "."))
+        return float(re.sub(r"[^\d.,]", "", price_text).replace(",", ".")), True
     except PlaywrightTimeoutError:
         logger.warning(f"Timeout while loading price {url}")
+        return 0.0, False
     except Exception:
         logger.exception(f"get_product_price failed {url}")
-    return 0.0
+    return 0.0, True
 
 
 async def click_characteristic_button(page: Page, url: str):
@@ -57,12 +59,13 @@ async def click_characteristic_button(page: Page, url: str):
         desc_button = page.locator('div[class^="mainWrap-"] div[class^="options-"] div.mo-button__text-content').first
         await desc_button.wait_for(state="visible")
         await desc_button.click()
-    except PlaywrightTimeoutError:
+    except PlaywrightTimeoutError as e:
         logger.warning(f"Timeout while click characteristic button {url}")
+        raise e
     except Exception:
         logger.exception(f"click_characteristic_button failed {url}")
 
-async def get_product_description(page: Page, url: str) -> str:
+async def get_product_description(page: Page, url: str) -> tuple[str, bool]:
     """
     Получить описание товара
     """
@@ -77,16 +80,16 @@ async def get_product_description(page: Page, url: str) -> str:
             desc_clean = desc_text[len("Описание"):].strip()
         else:
             desc_clean = desc_text.strip()
-        return desc_clean
-
-    except PlaywrightTimeoutError:
+        return desc_clean, True
+    except PlaywrightTimeoutError as e:
         logger.warning(f"Timeout while loading description {url}")
+        return "", False
     except Exception:
         logger.exception(f"get_product_description failed {url}")
-    return ""
+    return "", True
 
 
-async def get_product_images(page: Page, url: str) -> str:
+async def get_product_images(page: Page, url: str) -> tuple[str, bool]:
     """
     Получить изображения товара
     """
@@ -103,16 +106,17 @@ async def get_product_images(page: Page, url: str) -> str:
             except Exception:
                 logger.exception(f"product_image failed {url}")
 
-        return ", ".join(img_links)
+        return ", ".join(img_links), True
     except PlaywrightTimeoutError:
         logger.warning(f"Timeout while loading imagees {url}")
+        return "", False
     except Exception:
         logger.exception(f"get_product_images failed {url}")
-    return ""
+    return "", True
 
 
 
-async def get_product_characteristic(page: Page, url: str) -> Dict[str, str]:
+async def get_product_characteristic(page: Page, url: str) -> tuple[dict[Any, Any], bool]:
     """
     Получить описание товара
     """
@@ -132,15 +136,16 @@ async def get_product_characteristic(page: Page, url: str) -> Dict[str, str]:
                 logger.warning(f"Timeout while loading one row characteristic {url}")
             except Exception:
                 logger.exception("characteristic failed {url}")
-        return characteristics
-    except PlaywrightTimeoutError:
+        return characteristics, True
+    except PlaywrightTimeoutError as e:
         logger.warning(f"Timeout while loading characteristic {url}")
+        return {}, False
     except Exception:
         logger.exception(f"get_product_characteristic failed {url}")
-    return {}
+    return {}, True
 
 
-async def get_product_seller(page: Page, url: str) -> Tuple[str, str]:
+async def get_product_seller(page: Page, url: str) -> tuple[str, str, bool]:
     """
     Получить название и ссылку на селлера
     """
@@ -151,16 +156,17 @@ async def get_product_seller(page: Page, url: str) -> Tuple[str, str]:
         block_name = block.locator("div[class^=sellerInfoNameDefault-] span:nth-of-type(1)")
         await block_name.wait_for(state="visible")
         seller_name = await block_name.inner_text()
-        return seller_name, link
-    except PlaywrightTimeoutError:
+        return seller_name, link, True
+    except PlaywrightTimeoutError as e:
         logger.warning(f"Timeout while loading seller {url}")
+        return "", "", False
     except Exception:
         logger.exception(f"get_product_seller failed {url}")
-    return ("", "")
+    return "", "", True
 
 
 
-async def get_product_sizes(page: Page, url: str) -> str:
+async def get_product_sizes(page: Page, url: str) -> tuple[str, bool]:
     """
     Получить размеры товара
     """
@@ -179,15 +185,16 @@ async def get_product_sizes(page: Page, url: str) -> str:
             except Exception:
                 logger.exception(f"product_size failed {url}")
 
-        return ", ".join(f"{size1} ({size2})" for size1, size2 in sizes)
+        return ", ".join(f"{size1} ({size2})" for size1, size2 in sizes), True
     except PlaywrightTimeoutError:
         logger.warning(f"Timeout while loading sizes {url}")
+        return "", False
     except Exception:
         logger.exception(f"get_product_sizes failed {url}")
-    return ""
+    return "", True
 
 
-async def get_product_remains(page: Page, url: str):
+async def get_product_remains(page: Page, url: str) -> tuple[Any, bool]:
     """
     Получить остатки товара
     """
@@ -196,7 +203,7 @@ async def get_product_remains(page: Page, url: str):
         if await block.count() == 0:
             block = page.locator("div[class^=productSummary-] div.mo-badge__content span")
             if await block.count() == 0:
-                return "-"
+                return "-", True
         await block.first.wait_for(state="visible")
         remains = await block.first.inner_text()
         if (remains.startswith("Осталось")
@@ -207,18 +214,19 @@ async def get_product_remains(page: Page, url: str):
                 or remains.startswith("остались")
         ):
             remains_count = int(re.findall(r'\d+', remains)[0])
-            return remains_count
+            return remains_count, True
         else:
-            return "-"
+            return "-", True
     except PlaywrightTimeoutError:
         logger.warning(f"Timeout while loading remains {url}")
+        return "", False
     except Exception:
         logger.exception(f"get_product_remains failed {url}")
-    return "-"
+    return "-", True
 
 
 
-async def get_product_rating(page: Page, url: str) -> Tuple[float, int]:
+async def get_product_rating(page: Page, url: str) -> tuple[float, int, bool]:
     """
     Получить рейтинг и кол-во отзывов
     """
@@ -229,7 +237,7 @@ async def get_product_rating(page: Page, url: str) -> Tuple[float, int]:
 
         match = re.search(r'(\d+[\.,]?\d*)\s*[·•\-]\s*([\d\s]+)', rating_str)
         if not match:
-            return 0.0, 0
+            return 0.0, 0, True
         rating_str_clean = match.group(1).replace(',', '.')
         rating = float(rating_str_clean)
 
@@ -237,19 +245,21 @@ async def get_product_rating(page: Page, url: str) -> Tuple[float, int]:
         count_str_clean = re.sub(r'\s', '', count_str)
         count = int(count_str_clean)
 
-        return rating, count
+        return rating, count, True
     except PlaywrightTimeoutError:
         logger.warning(f"Timeout while loading rating {url}")
+        return 0.0, 0, False
     except Exception:
         logger.exception(f"get_product_rating failed {url}")
-    return 0.0, 0
+    return 0.0, 0, True
 
 
-async def parse_product_page(page: Page, url: str):
+async def parse_product_page(page: Page, url: str) -> tuple[dict[Any, Any], bool]:
     """
     Парсинг страницы товара
     """
     data = {}
+    success = {}
     await page.goto(url=url)
     block = page.locator("div[class^=productPageAside-]").first
     await block.wait_for(state="visible")
@@ -257,18 +267,19 @@ async def parse_product_page(page: Page, url: str):
 
     data["url"] = url
     data["article"] = get_article_from_url(url)
-    data["title"] = await get_product_title(page, url)
-    data["price"] = await get_product_price(page, url)
-    data["description"] = await get_product_description(page, url)
-    data["images"] = await get_product_images(page, url)
-    data["characteristics"] = await get_product_characteristic(page, url)
-    seller_name, seller_link = await get_product_seller(page, url)
+    data["title"], success["title"] = await get_product_title(page, url)
+    data["price"], success["price"] = await get_product_price(page, url)
+    data["description"], success["description"] = await get_product_description(page, url)
+    data["images"], success["images"] = await get_product_images(page, url)
+    data["characteristics"], success["characteristics"] = await get_product_characteristic(page, url)
+    seller_name, seller_link, success["seller"] = await get_product_seller(page, url)
     data["seller_name"] = seller_name
     data["seller_link"] = "https://www.wildberries.ru" + seller_link
-    data["sizes"] = await get_product_sizes(page, url)
-    data["remains"] = await get_product_remains(page, url)
-    rating, count_reviews = await get_product_rating(page, url)
+    data["sizes"], success["sizes"] = await get_product_sizes(page, url)
+    data["remains"], success["remains"] = await get_product_remains(page, url)
+    rating, count_reviews, success["rating"] = await get_product_rating(page, url)
     data["rating"] = rating
     data["count_reviews"] = count_reviews
 
-    return data
+    all_success = all(success.values())
+    return data, all_success

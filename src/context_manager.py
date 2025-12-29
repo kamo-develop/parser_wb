@@ -10,8 +10,8 @@ async def make_new_context(browser, proxy, user_agent):
         locale="ru-RU",
         timezone_id="Europe/Moscow",
     )
-    context.set_default_timeout(timeout=60000)
-    context.set_default_navigation_timeout(90000)
+    context.set_default_timeout(timeout=30000)
+    context.set_default_navigation_timeout(60000)
     logger.info(f"Made new context for proxy {proxy.get("server", "")}")
     return context
 
