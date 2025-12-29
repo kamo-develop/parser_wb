@@ -9,6 +9,7 @@ from config import conf
 from context_manager import create_contexts_with_proxy
 from export_data import save_data
 from parse_product import parse_product_page
+from utils import random_sleep
 
 
 async def product_parsing_task(context, queue: asyncio.Queue, results: List[Dict[str, Any]]):
@@ -23,6 +24,7 @@ async def product_parsing_task(context, queue: asyncio.Queue, results: List[Dict
                 break
 
             try:
+                await random_sleep(0.1, 0.3)
                 data = await parse_product_page(page, url)
                 results.append(data)
                 logger.info(f"Success parsed product page {url}")

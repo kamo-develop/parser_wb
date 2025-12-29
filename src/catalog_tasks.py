@@ -1,14 +1,14 @@
 import asyncio
-from typing import List, Dict
+from typing import List
 from urllib.parse import quote
 
 from loguru import logger
-from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
 from playwright.async_api import Error as PlaywrightError
+from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
 
 from config import conf
-from context_manager import create_contexts_with_proxy, create_one_context
-from utils import is_antibot_page, emulate_scroll_to_bottom_page
+from context_manager import create_one_context
+from utils import is_antibot_page, emulate_scroll_to_bottom_page, random_sleep
 
 
 async def parse_catalog_page(page: Page, url: str) -> List[str]:
@@ -46,6 +46,7 @@ async def catalog_page_parsing_task(context, queue: asyncio.Queue, product_links
                 break
 
             try:
+                await random_sleep(0.1, 0.3)
                 logger.debug(f"Parsing catalog page {url}")
                 links = await parse_catalog_page(page, url)
                 product_links.extend(links)
