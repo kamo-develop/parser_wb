@@ -1,29 +1,29 @@
 {
   "proxies": [
       {
-          "server": "185.183.160.58:16196",
-          "username": "fg2yVaet5b",
-          "password": "Lu96hrngkh"
+          "server": "194.226.247.227:20477",
+          "username": "dxkxbbW4VC",
+          "password": "8UEyafae5j"
       },
       {
-          "server": "194.226.247.151:22320",
-          "username": "JjcvMJC8uh",
-          "password": "9mNRMcndZt"
+          "server": "89.23.114.154:17740",
+          "username": "FRLRaPtuuh",
+          "password": "nE9TBcKUXy"
       },
       {
-          "server": "185.42.27.200:15493",
-          "username": "ZXyaJQfYBT",
-          "password": "GV35HE8gey"
+          "server": "82.147.88.115:20837",
+          "username": "2KTKTwAG7Y",
+          "password": "N4tCZsQH3a"
       },
       {
-          "server": "185.42.27.128:18853",
-          "username": "7cnHmMrHZ5",
-          "password": "6jP7EjnSAB"
+          "server": "5.8.16.231:15002",
+          "username": "jcXmn9EUNZ",
+          "password": "7a5CbM6fEg"
       }
   ],
   "query": "пальто из натуральной шерсти",
   "page_num_start": 1,
-  "page_num_end": 45,
+  "page_num_end": 1,
   "output_path": "output",
 
   "count_contexts": 4,
